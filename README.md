@@ -12,7 +12,10 @@ $ python manage.py runserver
 
 ## Lưu ý: Python==3.11.8
 ### Django
-$ pip install django
+$ pip install django==5.0.2
 
 ### Pillow:
 $ pip install Pillow
+
+### cài đặt mysqlclient
+$ pip install mysqlclient
