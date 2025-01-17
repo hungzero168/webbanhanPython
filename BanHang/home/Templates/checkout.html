@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% load humanize %}
+
+{% block title %}Thanh toán - Thuốc Thú Y{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Thanh toán</h1>
+    
+    <div class="row">
+        <!-- Thông tin giao hàng -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Thông tin giao hàng</h5>
+                    <form id="checkoutForm" method="POST" action="{% url 'place_order' %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Họ tên</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       name="fullname" 
+                                       value="{{ user.get_full_name }}"
+                                       required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="tel" 
+                                       class="form-control" 
+                                       name="phone" 
+                                       value="{{ profile.phone|default:'' }}"
+                                       required>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Tỉnh/Thành phố</label>
+                                <select class="form-select" name="province" id="province" required>
+                                    <option value="">Chọn Tỉnh/Thành phố</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Quận/Huyện</label>
+                                <select class="form-select" name="district" id="district" required disabled>
+                                    <option value="">Chọn Quận/Huyện</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Phường/Xã</label>
+                                <select class="form-select" name="ward" id="ward" required disabled>
+                                    <option value="">Chọn Phường/Xã</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ cụ thể</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="address_detail" 
+                                   placeholder="Số nhà, tên đường..."
+                                   value="{{ profile.address_detail|default:'' }}"
+                                   required>
+                        </div>
+
+                        <!-- Thêm input ẩn để lưu địa chỉ đầy đủ -->
+                        <input type="hidden" name="full_address" id="fullAddress">
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Phương thức thanh toán</label>
+                                <div class="payment-methods">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod" checked>
+                                        <label class="form-check-label" for="cod">
+                                            <i class="fas fa-money-bill-wave text-success me-2"></i>Thanh toán khi nhận hàng (COD)
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="bank" value="bank">
+                                        <label class="form-check-label" for="bank">
+                                            <i class="fas fa-university text-primary me-2"></i>Chuyển khoản ngân hàng
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="momo" value="momo">
+                                        <label class="form-check-label" for="momo">
+                                            <img src="{% static 'home/images/momo.jpg' %}" alt="MoMo" class="payment-icon me-2">Thanh toán qua ví MoMo
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <textarea class="form-control" 
+                                      name="note" 
+                                      rows="2"
+                                      placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay chỉ dẫn địa điểm giao hàng chi tiết hơn."></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Thông tin chuyển khoản (ẩn mặc định) -->
+            <div class="card mb-4 bank-info" style="display: none;">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Thông tin chuyển khoản</h5>
+                    <div class="alert alert-info">
+                        <p class="mb-2"><strong>Ngân hàng:</strong> Vietcombank</p>
+                        <p class="mb-2"><strong>Số tài khoản:</strong> 1234567890</p>
+                        <p class="mb-2"><strong>Chủ tài khoản:</strong> NGUYEN VAN A</p>
+                        <p class="mb-0"><strong>Nội dung:</strong> <span class="text-danger">Thanh toan don hang #[Mã đơn hàng]</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4 momo-info" style="display: none;">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Thanh toán qua MoMo</h5>
+                    <div class="alert alert-info">
+                        <div class="text-center mb-3">
+                            <img src="{% static 'images/momo-qr.png' %}" alt="MoMo QR" class="img-fluid" style="max-width: 200px;">
+                        </div>
+                        <p class="mb-2"><strong>Số điện thoại:</strong> 0123456789</p>
+                        <p class="mb-2"><strong>Tên tài khoản:</strong> NGUYEN VAN A</p>
+                        <p class="mb-0"><strong>Nội dung chuyển khoản:</strong> <span class="text-danger">Thanh toan don hang #[Mã đơn hàng]</span></p>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>Vui lòng chuyển khoản trước khi đặt hàng và chụp màn hình giao dịch để xác nhận nhanh hơn.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tổng đơn hàng -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Đơn hàng của bạn</h5>
+                    
+                    {% for item in cart_items %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>{{ item.product.name }} x {{ item.quantity }}</span>
+                        <span>{{ item.total_price|floatformat:0|intcomma }}đ</span>
+                    </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính:</span>
+                        <span>{{ subtotal|floatformat:0|intcomma }}đ</span>
+                    </div>
+                    
+                    {% if discount %}
+                    <div class="d-flex justify-content-between mb-2 text-success">
+                        <span>Giảm giá:</span>
+                        <span>-{{ discount|floatformat:0|intcomma }}đ</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fw-bold">Tổng cộng:</span>
+                        <span class="text-danger h5 mb-0">{{ total|floatformat:0|intcomma }}đ</span>
+                    </div>
+                    
+                    <button type="submit" form="checkoutForm" class="btn btn-primary w-100">
+                        Đặt hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+$(document).ready(function() {
+    // Khởi tạo biến lưu địa chỉ
+    let selectedProvince = '';
+    let selectedDistrict = '';
+    let selectedWard = '';
+
+    // Load tỉnh/thành phố
+    $.ajax({
+        url: 'https://provinces.open-api.vn/api/p/',
+        method: 'GET',
+        success: function(provinces) {
+            const select = $('#province');
+            provinces.forEach(province => {
+                select.append(`<option value="${province.code}" data-name="${province.name}">${province.name}</option>`);
+            });
+            
+            // Nếu có địa chỉ cũ, select lại
+            if ('{{ profile.province_code }}') {
+                select.val('{{ profile.province_code }}').trigger('change');
+            }
+        }
+    });
+
+    // Xử lý khi chọn tỉnh/thành phố
+    $('#province').change(function() {
+        const provinceCode = $(this).val();
+        const provinceName = $(this).find(':selected').data('name');
+        selectedProvince = provinceName;
+        
+        const districtSelect = $('#district');
+        const wardSelect = $('#ward');
+        
+        // Reset quận/huyện và phường/xã
+        districtSelect.html('<option value="">Chọn Quận/Huyện</option>').prop('disabled', true);
+        wardSelect.html('<option value="">Chọn Phường/Xã</option>').prop('disabled', true);
+        
+        if (provinceCode) {
+            // Load quận/huyện
+            $.ajax({
+                url: `https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`,
+                method: 'GET',
+                success: function(response) {
+                    const districts = response.districts;
+                    districts.forEach(district => {
+                        districtSelect.append(`<option value="${district.code}" data-name="${district.name}">${district.name}</option>`);
+                    });
+                    districtSelect.prop('disabled', false);
+                    
+                    // Nếu có địa chỉ cũ, select lại
+                    if ('{{ profile.district_code }}') {
+                        districtSelect.val('{{ profile.district_code }}').trigger('change');
+                    }
+                }
+            });
+        }
+        updateFullAddress();
+    });
+
+    // Xử lý khi chọn quận/huyện
+    $('#district').change(function() {
+        const districtCode = $(this).val();
+        const districtName = $(this).find(':selected').data('name');
+        selectedDistrict = districtName;
+        
+        const wardSelect = $('#ward');
+        wardSelect.html('<option value="">Chọn Phường/Xã</option>').prop('disabled', true);
+        
+        if (districtCode) {
+            // Load phường/xã
+            $.ajax({
+                url: `https://provinces.open-api.vn/api/d/${districtCode}?depth=2`,
+                method: 'GET',
+                success: function(response) {
+                    const wards = response.wards;
+                    wards.forEach(ward => {
+                        wardSelect.append(`<option value="${ward.code}" data-name="${ward.name}">${ward.name}</option>`);
+                    });
+                    wardSelect.prop('disabled', false);
+                    
+                    // Nếu có địa chỉ cũ, select lại
+                    if ('{{ profile.ward_code }}') {
+                        wardSelect.val('{{ profile.ward_code }}').trigger('change');
+                    }
+                }
+            });
+        }
+        updateFullAddress();
+    });
+
+    // Xử lý khi chọn phường/xã
+    $('#ward').change(function() {
+        selectedWard = $(this).find(':selected').data('name');
+        updateFullAddress();
+    });
+
+    // Xử lý khi nhập địa chỉ chi tiết
+    $('input[name="address_detail"]').on('input', function() {
+        updateFullAddress();
+    });
+
+    // Cập nhật địa chỉ đầy đủ
+    function updateFullAddress() {
+        const addressDetail = $('input[name="address_detail"]').val();
+        const fullAddress = [
+            addressDetail,
+            selectedWard,
+            selectedDistrict,
+            selectedProvince
+        ].filter(Boolean).join(', ');
+        
+        $('#fullAddress').val(fullAddress);
+    }
+
+    // Validate form trước khi submit
+    $('#checkoutForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Kiểm tra các trường bắt buộc
+        let isValid = true;
+        $(this).find('[required]').each(function() {
+            if (!$(this).val()) {
+                isValid = false;
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            toastr.error('Vui lòng điền đầy đủ thông tin');
+            return false;
+        }
+
+        // Cập nhật địa chỉ đầy đủ trước khi submit
+        updateFullAddress();
+
+        // Submit form bằng AJAX
+        $.ajax({
+            url: $(this).attr('action'),
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.success) {
+                    window.location.href = response.redirect_url;
+                } else {
+                    toastr.error(response.message || 'Có lỗi xảy ra');
+                }
+            },
+            error: function(xhr) {
+                toastr.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+            }
+        });
+    });
+
+    // Xử lý hiển thị thông tin thanh toán
+    $('input[name="payment_method"]').change(function() {
+        const method = $(this).val();
+        $('.bank-info, .momo-info').slideUp();
+        
+        if (method === 'bank') {
+            $('.bank-info').slideDown();
+        } else if (method === 'momo') {
+            $('.momo-info').slideDown();
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+.bank-info {
+    transition: all 0.3s ease;
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+.form-control.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* Style cho phương thức thanh toán */
+.payment-methods {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+}
+
+.payment-methods .form-check {
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.payment-methods .form-check:hover {
+    background-color: #f8f9fa;
+}
+
+.payment-methods .form-check-input:checked + .form-check-label {
+    font-weight: 500;
+}
+
+.payment-icon {
+    height: 24px;
+    width: auto;
+    vertical-align: middle;
+}
+
+/* Style cho thông tin thanh toán */
+.bank-info, .momo-info {
+    display: none;
+    transition: all 0.3s ease;
+}
+
+/* Style cho form địa chỉ */
+.form-select {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+}
+
+.form-select:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Loading state */
+.form-select.loading {
+    background-image: url("data:image/svg+xml,..."); /* Add loading spinner SVG */
+    background-size: 1rem;
+}
+</style>
+{% endblock %} 

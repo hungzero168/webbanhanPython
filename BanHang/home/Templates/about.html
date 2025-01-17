@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Giới thiệu - Thuốc Thú Y{% endblock %}
+
+{% block extra_css %}
+<style>
+.about-header {
+    background: linear-gradient(135deg, #0d6efd 0%, #0099ff 100%);
+    padding: 80px 0;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('{% static "home/images/pattern.png" %}') center;
+    opacity: 0.1;
+}
+
+.about-header .container {
+    position: relative;
+    z-index: 1;
+}
+
+.feature-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(13, 110, 253, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #0d6efd;
+    margin-bottom: 1.5rem;
+}
+
+.team-member {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.team-member img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border: 5px solid #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.team-member .social-links a {
+    color: #6c757d;
+    margin: 0 8px;
+    transition: color 0.3s ease;
+}
+
+.team-member .social-links a:hover {
+    color: #0d6efd;
+}
+
+.stats-section {
+    background: #f8f9fa;
+    padding: 60px 0;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 20px;
+}
+
+.stat-item .number {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #0d6efd;
+    margin-bottom: 0.5rem;
+}
+
+.stat-item .label {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.testimonial-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 1rem 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.testimonial-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+}
+
+.testimonial-card .quote {
+    font-size: 3rem;
+    color: #e9ecef;
+    position: absolute;
+    right: 2rem;
+    bottom: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<div class="about-header mb-5">
+    <div class="container text-center">
+        <h1 class="display-4 mb-4">Về chúng tôi</h1>
+        <p class="lead mb-0">Chăm sóc sức khỏe vật nuôi với sự tận tâm và chuyên nghiệp</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Our Story Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h2 class="mb-4">Câu chuyện của chúng tôi</h2>
+            <p class="lead text-muted mb-4">Với hơn 10 năm kinh nghiệm trong lĩnh vực thuốc thú y, chúng tôi tự hào là đối tác tin cậy của nhiều bác sĩ thú y và chủ vật nuôi.</p>
+            <p class="mb-4">Chúng tôi cung cấp các sản phẩm thuốc thú y chất lượng cao, đảm bảo nguồn gốc xuất xứ rõ ràng, giúp bảo vệ sức khỏe vật nuôi của bạn.</p>
+            <a href="{% url 'contact' %}" class="btn btn-primary">Liên hệ với chúng tôi</a>
+        </div>
+        <div class="col-lg-6">
+            <img src="{% static 'home/images/about-story.jpg' %}" alt="Our Story" class="img-fluid rounded-3">
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2>Tại sao chọn chúng tôi?</h2>
+            <p class="text-muted">Những giá trị chúng tôi mang lại cho khách hàng</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h5 class="card-title">Sản phẩm chất lượng</h5>
+                    <p class="card-text text-muted">Cam kết cung cấp các sản phẩm chính hãng, có giấy tờ nguồn gốc rõ ràng</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h5 class="card-title">Giao hàng nhanh chóng</h5>
+                    <p class="card-text text-muted">Đội ngũ giao hàng chuyên nghiệp, đảm bảo hàng đến tay khách hàng an toàn</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h5 class="card-title">Hỗ trợ 24/7</h5>
+                    <p class="card-text text-muted">Đội ngũ tư vấn viên chuyên nghiệp, sẵn sàng hỗ trợ mọi lúc</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-section mb-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="number">5000+</div>
+                        <div class="label">Khách hàng</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="number">1000+</div>
+                        <div class="label">Sản phẩm</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="number">50+</div>
+                        <div class="label">Đối tác</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="number">10+</div>
+                        <div class="label">Năm kinh nghiệm</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2>Đội ngũ của chúng tôi</h2>
+            <p class="text-muted">Những chuyên gia luôn sẵn sàng hỗ trợ bạn</p>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="team-member">
+                <img src="{% static 'home/images/team-1.jpg' %}" alt="Team member">
+                <h5 class="mb-1">Nguyễn Văn A</h5>
+                <p class="text-muted mb-2">Giám đốc điều hành</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <!-- Thêm các thành viên khác tương tự -->
+    </div>
+
+    <!-- Testimonials Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2>Khách hàng nói gì về chúng tôi</h2>
+            <p class="text-muted">Những đánh giá từ khách hàng thân thiết</p>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="testimonial-card position-relative">
+                <div class="d-flex align-items-center mb-3">
+                    <img src="{% static 'home/images/testimonial-1.jpg' %}" alt="Testimonial">
+                    <div>
+                        <h5 class="mb-1">Trần Thị B</h5>
+                        <p class="text-muted mb-0">Khách hàng</p>
+                    </div>
+                </div>
+                <p class="mb-0">"Sản phẩm chất lượng, giao hàng nhanh chóng. Nhân viên tư vấn rất nhiệt tình và chuyên nghiệp."</p>
+                <i class="fas fa-quote-right quote"></i>
+            </div>
+        </div>
+        <!-- Thêm testimonial khác tương tự -->
+    </div>
+</div>
+{% endblock %} 

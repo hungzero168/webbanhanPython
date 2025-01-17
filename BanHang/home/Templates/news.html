@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tin tức - Thuốc Thú Y{% endblock %}
+
+{% block extra_css %}
+<style>
+.news-card {
+    border: none;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+}
+
+.news-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.news-card .card-body {
+    padding: 1.5rem;
+}
+
+.news-category {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.news-meta {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.news-meta i {
+    margin-right: 5px;
+}
+
+.news-meta span {
+    margin-right: 15px;
+}
+
+.featured-news {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.featured-news img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+
+.featured-news .overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: white;
+}
+
+.featured-news .news-category {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+.sidebar .card {
+    border: none;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    border-radius: 12px;
+}
+
+.popular-post {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.popular-post:hover {
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.popular-post img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 1rem;
+}
+
+.popular-post h6 {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.tag-cloud .btn {
+    margin: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Trang chủ</a></li>
+            <li class="breadcrumb-item active">Tin tức</li>
+        </ol>
+    </nav>
+
+    <!-- Featured News -->
+    <div class="featured-news">
+        <img src="{% static 'home/images/featured-news.jpg' %}" alt="Featured news">
+        <div class="overlay">
+            <span class="news-category">Thú cưng</span>
+            <h2 class="mb-3">Cách chăm sóc thú cưng trong mùa nắng nóng</h2>
+            <div class="news-meta">
+                <span><i class="far fa-calendar"></i> 15/01/2025</span>
+                <span><i class="far fa-user"></i> Admin</span>
+                <span><i class="far fa-comment"></i> 5 bình luận</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="row g-4">
+                {% for i in "123456"|make_list %}
+                <div class="col-md-6">
+                    <div class="card news-card h-100">
+                        <img src="{% static 'home/images/news-sample.jpg' %}" class="card-img-top" alt="News image">
+                        <div class="card-body">
+                            <span class="news-category">Thú y</span>
+                            <h5 class="card-title">Những điều cần biết về việc tiêm phòng cho vật nuôi</h5>
+                            <p class="card-text text-muted">Tìm hiểu về lịch tiêm phòng và các loại vaccine cần thiết cho thú cưng của bạn...</p>
+                            <div class="news-meta mb-3">
+                                <span><i class="far fa-calendar"></i> 15/01/2025</span>
+                                <span><i class="far fa-eye"></i> 123 lượt xem</span>
+                            </div>
+                            <a href="#" class="btn btn-outline-primary">Đọc thêm</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4 sidebar">
+            <!-- Search -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Tìm kiếm</h5>
+                    <form>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Nhập từ khóa...">
+                            <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Danh mục</h5>
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Thú cưng
+                            <span class="badge bg-primary rounded-pill">12</span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Thú y
+                            <span class="badge bg-primary rounded-pill">8</span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Dinh dưỡng
+                            <span class="badge bg-primary rounded-pill">6</span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Mẹo chăm sóc
+                            <span class="badge bg-primary rounded-pill">10</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popular Posts -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Bài viết nổi bật</h5>
+                    {% for i in "1234"|make_list %}
+                    <div class="popular-post">
+                        <img src="{% static 'home/images/news-sample.jpg' %}" alt="Popular post">
+                        <div>
+                            <h6>Cách phòng bệnh cho vật nuôi trong mùa mưa</h6>
+                            <div class="news-meta">
+                                <span><i class="far fa-calendar"></i> 15/01/2025</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% if not forloop.last %}<hr class="my-2">{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Thẻ</h5>
+                    <div class="tag-cloud">
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Thú cưng</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Vaccine</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Chó</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Mèo</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Dinh dưỡng</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Thuốc</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Chăm sóc</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Sức khỏe</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

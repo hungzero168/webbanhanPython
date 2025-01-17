@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% load humanize %}
+
+{% block title %}Giỏ hàng - Thuốc Thú Y{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Giỏ hàng</h1>
+
+    {% if cart_items %}
+    <div class="row">
+        <!-- Danh sách sản phẩm -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    {% for item in cart_items %}
+                    <div class="cart-item mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="row align-items-center">
+                            <!-- Ảnh sản phẩm -->
+                            <div class="col-md-2">
+                                <img src="{{ item.product.image.url }}" class="img-fluid rounded" alt="{{ item.product.name }}">
+                            </div>
+                            
+                            <!-- Thông tin sản phẩm -->
+                            <div class="col-md-4">
+                                <h5 class="mb-1">
+                                    <a href="{% url 'product_detail' id=item.product.id %}" class="text-decoration-none text-dark">
+                                        {{ item.product.name }}
+                                    </a>
+                                </h5>
+                                <p class="text-muted mb-0">{{ item.product.category.name }}</p>
+                            </div>
+                            
+                            <!-- Số lượng -->
+                            <div class="col-md-3">
+                                <div class="input-group quantity-group">
+                                    <button class="btn btn-outline-secondary update-quantity" 
+                                            type="button" 
+                                            data-action="decrease"
+                                            data-item-id="{{ item.id }}">-</button>
+                                    <input type="number" 
+                                           class="form-control quantity-input" 
+                                           value="{{ item.quantity }}" 
+                                           min="1"
+                                           data-item-id="{{ item.id }}">
+                                    <button class="btn btn-outline-secondary update-quantity" 
+                                            type="button" 
+                                            data-action="increase"
+                                            data-item-id="{{ item.id }}">+</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Giá -->
+                            <div class="col-md-2 text-end">
+                                <span class="text-danger fw-bold">{{ item.total_price|floatformat:0|intcomma }}đ</span>
+                            </div>
+                            
+                            <!-- Nút xóa -->
+                            <div class="col-md-1 text-end">
+                                <button class="btn btn-link text-danger remove-item" 
+                                        data-item-id="{{ item.id }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tổng tiền -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Tổng đơn hàng</h5>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính:</span>
+                        <span class="cart-subtotal">{{ subtotal|floatformat:0|intcomma }}đ</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-2 text-success discount-row" {% if not discount %}style="display: none;"{% endif %}>
+                        <span>Giảm giá:</span>
+                        <span class="cart-discount">{% if discount %}-{{ discount|floatformat:0|intcomma }}đ{% endif %}</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fw-bold">Tổng cộng:</span>
+                        <span class="text-danger h5 mb-0 cart-total">{{ total|floatformat:0|intcomma }}đ</span>
+                    </div>
+                    
+                    <!-- Mã giảm giá -->
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="couponCode" placeholder="Mã giảm giá">
+                            <button class="btn btn-outline-primary" type="button" id="applyCoupon">
+                                <i class="fas fa-ticket-alt me-1"></i>Áp dụng
+                            </button>
+                        </div>
+                        <small class="text-muted">Nhập mã giảm giá nếu có</small>
+                    </div>
+                    
+                    <a href="{% url 'checkout' %}" class="btn btn-primary w-100">Thanh toán</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <img src="{% static 'images/empty-cart.png' %}" alt="Empty cart" class="mb-4" style="max-width: 200px;">
+        <h3>Giỏ hàng trống</h3>
+        <p class="text-muted">Hãy thêm sản phẩm vào giỏ hàng của bạn</p>
+        <a href="{% url 'products' %}" class="btn btn-primary">Tiếp tục mua sắm</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+$(document).ready(function() {
+    // Xử lý nút tăng giảm số lượng
+    $('.update-quantity').click(function() {
+        const btn = $(this);
+        const itemId = btn.data('item-id');
+        const action = btn.data('action');
+        const input = $(`.quantity-input[data-item-id="${itemId}"]`);
+        const priceElement = btn.closest('.cart-item').find('.item-total');
+        let quantity = parseInt(input.val());
+
+        if (action === 'increase') {
+            quantity += 1;
+        } else if (action === 'decrease' && quantity > 1) {
+            quantity -= 1;
+        }
+
+        updateCartItem(itemId, quantity, input, priceElement);
+    });
+
+    // Xử lý input số lượng
+    $('.quantity-input').on('change', function() {
+        const input = $(this);
+        const itemId = input.data('item-id');
+        const quantity = parseInt(input.val());
+        const priceElement = input.closest('.cart-item').find('.item-total');
+
+        if (isNaN(quantity) || quantity < 1) {
+            input.val(1);
+            return;
+        }
+
+        updateCartItem(itemId, quantity, input, priceElement);
+    });
+
+    // Xử lý nút xóa sản phẩm
+    $('.remove-item').click(function() {
+        const btn = $(this);
+        const itemId = btn.data('item-id');
+        const cartItem = btn.closest('.cart-item');
+
+        if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+            $.ajax({
+                url: `/cart/remove/${itemId}/`,
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Animation xóa item
+                        cartItem.fadeOut(300, function() {
+                            $(this).remove();
+                            // Kiểm tra nếu không còn sản phẩm nào
+                            if ($('.cart-item').length === 0) {
+                                location.reload(); // Reload để hiện empty cart
+                            }
+                        });
+                        
+                        // Cập nhật tổng tiền
+                        updateCartTotals(response.cart_total, response.discount);
+                        
+                        // Cập nhật số lượng trong giỏ hàng
+                        $('.cart-count').text(response.cart_count);
+                        
+                        toastr.success(response.message);
+                    } else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function() {
+                    toastr.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+                }
+            });
+        }
+    });
+
+    // Xử lý áp dụng mã giảm giá
+    $('#applyCoupon').click(function() {
+        const btn = $(this);
+        const code = $('#couponCode').val().trim();
+        
+        if (!code) {
+            toastr.warning('Vui lòng nhập mã giảm giá');
+            return;
+        }
+
+        btn.prop('disabled', true);
+        
+        $.ajax({
+            url: '/cart/apply-coupon/',
+            method: 'POST',
+            data: {
+                code: code
+            },
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Cập nhật UI
+                    updateCartTotals(response.cart_total, response.discount);
+                    
+                    // Hiển thị thông tin giảm giá
+                    if (response.discount > 0) {
+                        $('.discount-row').show();
+                    }
+                    
+                    $('#couponCode').val('');
+                    toastr.success(response.message);
+                } else {
+                    toastr.error(response.message);
+                }
+            },
+            error: function() {
+                toastr.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+            },
+            complete: function() {
+                btn.prop('disabled', false);
+            }
+        });
+    });
+
+    // Hàm cập nhật số lượng sản phẩm
+    function updateCartItem(itemId, quantity, input, priceElement) {
+        $.ajax({
+            url: `/cart/update/${itemId}/`,
+            method: 'POST',
+            data: {
+                quantity: quantity
+            },
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Cập nhật UI
+                    input.val(quantity);
+                    priceElement.text(formatCurrency(response.item_total));
+                    updateCartTotals(response.cart_total, response.discount);
+                    toastr.success(response.message);
+                } else {
+                    input.val(response.current_quantity);
+                    toastr.error(response.message);
+                }
+            },
+            error: function() {
+                toastr.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+            }
+        });
+    }
+
+    // Hàm format tiền tệ
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount).replace('₫', 'đ');
+    }
+
+    // Hàm cập nhật tổng tiền
+    function updateCartTotals(subtotal, discount) {
+        $('.cart-subtotal').text(formatCurrency(subtotal));
+        if (discount > 0) {
+            $('.cart-discount').text('-' + formatCurrency(discount));
+        }
+        $('.cart-total').text(formatCurrency(subtotal - discount));
+    }
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+/* Style cho input số lượng */
+.quantity-input {
+    width: 50px !important;  /* Tăng độ rộng input */
+    text-align: center;
+    padding: 0.375rem 0.5rem;
+}
+
+/* Style cho nút tăng giảm */
+.update-quantity {
+    min-width: 38px;
+    padding: 0.375rem 0.5rem;
+}
+
+/* Đảm bảo input group có đủ chỗ */
+.quantity-group {
+    width: 130px !important;  /* Tăng độ rộng của cả group */
+    min-width: 130px;
+}
+
+/* Ẩn mũi tên tăng giảm mặc định của input number */
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.quantity-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Style cho phần mã giảm giá */
+#couponCode {
+    border-right: 0;
+}
+
+#applyCoupon {
+    border-left: 0;
+}
+
+#applyCoupon:hover {
+    background-color: #f8f9fa;
+}
+
+#applyCoupon:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.discount-row {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %} 

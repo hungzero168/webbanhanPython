@@ -1,0 +1,1324 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% load humanize %}
+
+{% block title %}Trang chủ - Thuốc Thú Y{% endblock %}
+
+{% block extra_css %}
+    <style>
+        /* Style cho category card */
+        .category-card {
+            position: relative;
+            background: #fff;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            height: 100%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .category-img-wrapper {
+            position: relative;
+            padding-top: 65%;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        .category-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        .category-card:hover .category-img {
+            transform: scale(1.1);
+        }
+
+        .category-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .category-card:hover .category-overlay {
+            opacity: 1;
+        }
+
+        .category-overlay .btn {
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+            font-weight: 500;
+            padding: 10px 25px;
+            background: rgba(255,255,255,0.95);
+            border: none;
+        }
+
+        .category-card:hover .category-overlay .btn {
+            transform: translateY(0);
+        }
+
+        .category-overlay .btn:hover {
+            background: #fff;
+            color: var(--primary);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            text-align: center;
+            background: #fff;
+        }
+
+        .category-card .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 0.75rem;
+            transition: color 0.3s ease;
+        }
+
+        .category-card:hover .card-title {
+            color: var(--primary);
+        }
+
+        .category-card .card-text {
+            font-size: 0.95rem;
+            color: #636e72;
+            line-height: 1.5;
+        }
+
+        .categories-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 5rem 0;
+        }
+
+        .section-title {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 1rem;
+        }
+
+        .title-border {
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            margin: 0 auto;
+            border-radius: 2px;
+        }
+
+        /* Style cho category card */
+        .category-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .category-img {
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .category-card:hover .category-img {
+            transform: scale(1.05);
+        }
+
+        .category-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .category-card .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .category-card .card-text {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .category-card .btn {
+            transition: all 0.3s;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+        }
+
+        .category-card:hover .btn {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .hero-banner {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                        url("{% static 'home/images/bgthuy.png' %}");
+            background-size: cover;
+            height: 600px;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        .product-feature {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+        .testimonial-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .news-card {
+            transition: transform 0.3s;
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Style cho ảnh sản phẩm */
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Style cho ảnh tính năng */
+        .feature-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+        }
+
+        /* Style cho ảnh trong giỏ hàng */
+        .cart-product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        /* Style cho ảnh testimonial */
+        .testimonial-avatar {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        /* Style cho ảnh công ty */
+        .company-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        /* Style cho ảnh tin tức */
+        .news-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* Style cho ảnh xem nhanh sản phẩm */
+        .quick-view-image {
+            width: 100%;
+            height: 400px;
+            object-fit: contain;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        /* Style cho ảnh feature/công dụng */
+        .product-feature img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        /* Style cho ảnh sản phẩm trong grid */
+        .card-img-top {
+            height: 250px;
+            object-fit: cover;
+        }
+
+        /* Style cho ảnh trong giỏ hàng */
+        .cart-product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        /* Style cho ảnh testimonial */
+        .testimonial-card img.rounded-circle {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+
+        .testimonial-card img.company-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        /* Style cho ảnh tin tức */
+        .news-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        /* Style cho ảnh trong modal xem nhanh */
+        .quick-view-img {
+            width: 100%;
+            height: 400px;
+            object-fit: contain;
+            background-color: #f8f9fa;
+        }
+
+        /* Style cho ảnh banner sản phẩm */
+        .product-banner-img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .product-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .product-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 2;
+        }
+
+        .add-to-wishlist {
+            transition: all 0.3s;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(-10px);
+            z-index: 3;
+        }
+
+        .product-card:hover .add-to-wishlist {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .add-to-wishlist.active {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .add-to-wishlist.active i {
+            font-weight: 900;
+        }
+
+        .rating {
+            color: #ffc107;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .rating .count {
+            color: #6c757d;
+            margin-left: 5px;
+        }
+
+        .price-section {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .old-price {
+            text-decoration: line-through;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .current-price {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .stock-status {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .in-stock {
+            color: #28a745;
+        }
+
+        .out-of-stock {
+            color: #dc3545;
+        }
+
+        .btn-buy-now {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-buy-now:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: #0d6efd;
+        }
+
+        .carousel-item img {
+            height: 400px;
+            object-fit: cover;
+        }
+
+        .carousel-caption {
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            padding: 8px 16px;
+            background-color: #0d6efd;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .add-to-cart:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-2px);
+        }
+
+        .add-to-cart:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Categories Section Styles */
+        .title-border {
+            width: 80px;
+            height: 3px;
+            background: var(--primary);
+        }
+
+        .category-card {
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .hover-scale:hover {
+            transform: translateY(-5px);
+        }
+
+        .category-img-wrapper {
+            position: relative;
+            overflow: hidden;
+            padding-top: 75%; /* 4:3 Aspect Ratio */
+        }
+
+        .category-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        .category-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover .category-overlay {
+            opacity: 1;
+        }
+
+        .category-card:hover .category-img {
+            transform: scale(1.1);
+        }
+
+        .section-title h2 {
+            position: relative;
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <h1 class="display-4">Chăm sóc sức khỏe vật nuôi của bạn</h1>
+                    <p class="lead">Sản phẩm thuốc thú y chất lượng cao, đảm bảo an toàn cho vật nuôi</p>
+                    <a href="#" class="btn btn-primary btn-lg">Tìm hiểu thêm</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Section -->
+    <section class="categories-section py-5 bg-light">
+        <div class="container">
+            <div class="section-title text-center mb-5">
+                <h2 class="fw-bold">Danh mục sản phẩm</h2>
+                <div class="title-border mx-auto mt-3"></div>
+            </div>
+            <div class="row g-4">
+                {% for category in categories %}
+                <div class="col-md-4">
+                    <div class="category-card h-100 rounded-3 overflow-hidden shadow-sm hover-scale">
+                        <a href="{% url 'products' %}?category={{ category.id }}" class="text-decoration-none">
+                            <div class="card border-0">
+                                <div class="category-img-wrapper">
+                                    {% if category.image %}
+                                    <img src="{{ category.image.url }}" class="card-img-top category-img" alt="{{ category.name }}">
+                                    {% else %}
+                                    <img src="{% static 'home/images/no-image.png' %}" class="card-img-top category-img" alt="No image">
+                                    {% endif %}
+                                    <div class="category-overlay">
+                                        <span class="btn btn-light rounded-pill px-4">Xem sản phẩm</span>
+                                    </div>
+                                </div>
+                                <div class="card-body text-center py-4">
+                                    <h4 class="card-title text-dark mb-2">{{ category.name }}</h4>
+                                    {% if category.description %}
+                                    <p class="card-text text-muted mb-0">{{ category.description|truncatewords:15 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Features -->
+    <section class="product-feature">
+        <div class="container">
+            <h2 class="text-center mb-5">Công dụng sản phẩm</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <img src="{% static 'home/images/1.jpeg' %}" alt="Feature 1" class="mb-3">
+                        <h4>Tăng sức đề kháng</h4>
+                        <p>Giúp vật nuôi khỏe mạnh, phòng chống bệnh tật hiệu quả</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <img src="{% static 'home/images/2.jpeg' %}" alt="Feature 2" class="mb-3">
+                        <h4>Kích thích tăng trưởng</h4>
+                        <p>Thúc đẩy phát triển nhanh, tăng năng suất chăn nuôi</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <img src="{% static 'home/images/3.jpeg' %}" alt="Feature 3" class="mb-3">
+                        <h4>An toàn tuyệt đối</h4>
+                        <p>Không có tác dụng phụ, an toàn cho người sử dụng</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Sản phẩm nổi bật</h2>
+            
+            <!-- Product Grid -->
+            <div class="row g-4">
+                {% for product in featured_products %}
+                <div class="col-md-3">
+                    <div class="card h-100 product-card">
+                        <!-- Badge giảm giá -->
+                        {% if product.old_price %}
+                        <div class="badge bg-danger position-absolute top-0 end-0 m-2">
+                            -{{ product.old_price|discount_percent:product.price }}%
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Nút wishlist -->
+                        <button class="btn btn-light btn-sm position-absolute top-0 start-0 m-2 wishlist-btn" 
+                                data-product-id="{{ product.id }}"
+                                {% if user.is_authenticated %}
+                                    {% if product in wishlist_products %}
+                                        data-in-wishlist="true"
+                                    {% endif %}
+                                {% else %}
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#loginModal"
+                                {% endif %}>
+                            <i class="{% if product in wishlist_products %}fas{% else %}far{% endif %} fa-heart text-danger"></i>
+                        </button>
+                        
+                        <!-- Link đến trang chi tiết -->
+                        <a href="{% url 'product_detail' id=product.id %}" class="text-decoration-none text-dark">
+                        <!-- Ảnh sản phẩm -->
+                        <div class="product-img-wrapper">
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        </div>
+
+                        <div class="card-body">
+                            <!-- Tên sản phẩm -->
+                                <h5 class="card-title">{{ product.name }}</h5>
+
+                            <!-- Giá và đánh giá -->
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="text-danger fw-bold">{{ product.price|floatformat:0|intcomma }}đ</span>
+                                    {% if product.old_price %}
+                                    <small class="text-decoration-line-through text-muted">{{ product.old_price|floatformat:0|intcomma }}đ</small>
+                                    {% endif %}
+                                </div>
+                                <!-- Product rating -->
+                                <div class="d-flex align-items-center mb-2">
+                                    {% with ''|center:5 as range %}
+                                    {% for _ in range %}
+                                        <i class="{% if forloop.counter <= product.average_rating %}fas{% else %}far{% endif %} fa-star text-warning"></i>
+                                    {% endfor %}
+                                    {% endwith %}
+                                    <span class="ms-1">({{ product.review_count }} đánh giá)</span>
+                                </div>
+                            </div>
+
+                            <!-- Mô tả ngắn -->
+                            <p class="card-text small text-muted mb-3">{{ product.description|truncatewords:20 }}</p>
+                            </div>
+                        </a>
+
+                        <!-- Nút thêm vào giỏ -->
+                        <div class="card-footer bg-transparent border-0">
+                            <div class="d-grid">
+                                {% if product.stock > 0 %}
+                                <button type="button" class="btn btn-primary w-100 add-to-cart" 
+                                        data-product-id="{{ product.id }}">
+                                    <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ
+                                </button>
+                                {% else %}
+                                <button class="btn btn-secondary" disabled>
+                                    <i class="fas fa-times"></i> Hết hàng
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- New Products Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title">Sản phẩm mới</h2>
+            <div class="row g-4">
+                {% for product in new_products %}
+                <div class="col-md-3">
+                    <div class="card product-card">
+                        {% if product.discount_percentage > 0 %}
+                        <div class="discount-badge">
+                            -{{ product.discount_percentage }}%
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.is_authenticated %}
+                        <button class="add-to-wishlist {% if product in wishlist_products %}active{% endif %}" 
+                                data-id="{{ product.id }}" 
+                                title="{% if product in wishlist_products %}Xóa khỏi yêu thích{% else %}Thêm vào yêu thích{% endif %}">
+                            <i class="{% if product in wishlist_products %}fas{% else %}far{% endif %} fa-heart"></i>
+                        </button>
+                        {% else %}
+                        <button class="add-to-wishlist" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        {% endif %}
+
+                        <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
+                            {% if product.image %}
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                            {% else %}
+                            <img src="{% static 'home/images/no-image.png' %}" class="card-img-top" alt="No image">
+                            {% endif %}
+                        
+                            <div class="card-body">
+                                <h5 class="card-title text-dark">{{ product.name }}</h5>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-tag me-1"></i>{{ product.category.name }}
+                                </p>
+                                
+                                <div class="rating">
+                                    {% for i in "12345"|make_list %}
+                                    <i class="{% if forloop.counter <= product.average_rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                    {% endfor %}
+                                    <span class="count">({{ product.review_count }})</span>
+                                </div>
+
+                                <div class="price-section">
+                                    {% if product.old_price %}
+                                    <span class="old-price">{{ product.old_price|floatformat:0 }}đ</span>
+                                    {% endif %}
+                                    <span class="current-price">{{ product.price|floatformat:0 }}đ</span>
+                                </div>
+
+                                <p class="stock-status">
+                                    {% if product.stock > 0 %}
+                                    <i class="fas fa-check-circle me-1 in-stock"></i>
+                                    <span class="in-stock">Còn hàng</span>
+                                    {% else %}
+                                    <i class="fas fa-times-circle me-1 out-of-stock"></i>
+                                    <span class="out-of-stock">Hết hàng</span>
+                                    {% endif %}
+                                </p>
+
+                                <button class="add-to-cart" data-product-id="{{ product.id }}" {% if not product.stock %}disabled{% endif %}>
+                                    <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ
+                                </button>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Best Sellers Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="section-title">Sản phẩm bán chạy</h2>
+            <div class="row g-4">
+                {% for product in best_sellers %}
+                <div class="col-md-3">
+                    <div class="card product-card">
+                        {% if product.discount_percentage > 0 %}
+                        <div class="discount-badge">
+                            -{{ product.discount_percentage }}%
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.is_authenticated %}
+                        <button class="add-to-wishlist {% if product in wishlist_products %}active{% endif %}" 
+                                data-id="{{ product.id }}" 
+                                title="{% if product in wishlist_products %}Xóa khỏi yêu thích{% else %}Thêm vào yêu thích{% endif %}">
+                            <i class="{% if product in wishlist_products %}fas{% else %}far{% endif %} fa-heart"></i>
+                        </button>
+                        {% else %}
+                        <button class="add-to-wishlist" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        {% endif %}
+
+                        <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
+                            {% if product.image %}
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                            {% else %}
+                            <img src="{% static 'home/images/no-image.png' %}" class="card-img-top" alt="No image">
+                            {% endif %}
+                        
+                            <div class="card-body">
+                                <h5 class="card-title text-dark">{{ product.name }}</h5>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-tag me-1"></i>{{ product.category.name }}
+                                </p>
+                                
+                                <div class="rating">
+                                    {% for i in "12345"|make_list %}
+                                    <i class="{% if forloop.counter <= product.average_rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                    {% endfor %}
+                                    <span class="count">({{ product.review_count }})</span>
+                                </div>
+
+                                <div class="price-section">
+                                    {% if product.old_price %}
+                                    <span class="old-price">{{ product.old_price|floatformat:0 }}đ</span>
+                                    {% endif %}
+                                    <span class="current-price">{{ product.price|floatformat:0 }}đ</span>
+                                </div>
+
+                                <p class="stock-status">
+                                    {% if product.stock > 0 %}
+                                    <i class="fas fa-check-circle me-1 in-stock"></i>
+                                    <span class="in-stock">Còn hàng</span>
+                                    {% else %}
+                                    <i class="fas fa-times-circle me-1 out-of-stock"></i>
+                                    <span class="out-of-stock">Hết hàng</span>
+                                    {% endif %}
+                                </p>
+
+                                <button class="add-to-cart" data-product-id="{{ product.id }}" {% if not product.stock %}disabled{% endif %}>
+                                    <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ
+                                </button>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Pagination -->
+    {% if products.has_other_pages %}
+    <div class="d-flex justify-content-center mt-5">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if products.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ products.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                        <i class="fas fa-chevron-left"></i> Trước
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-chevron-left"></i> Trước</span>
+                </li>
+                {% endif %}
+
+                {% for i in products.paginator.page_range %}
+                    {% if products.number == i %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ i }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if products.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ products.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                        Sau <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Sau <i class="fas fa-chevron-right"></i></span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+
+    <!-- Quick View Modal -->
+    <div class="modal fade" id="quickViewModal1" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Vitamin ADE</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img src="{% static 'home/images/products/product1.jpg' %}" class="img-fluid" alt="Product">
+                        </div>
+                        <div class="col-md-6">
+                            <h3>Vitamin ADE</h3>
+                            <div class="mb-3">
+                                <span class="text-danger h4">350,000đ</span>
+                                <small class="text-decoration-line-through text-muted ms-2">390,000đ</small>
+                            </div>
+                            <p>Vitamin tổng hợp cho gia súc, tăng cường sức đề kháng. Sản phẩm được nghiên cứu và phát triển bởi đội ngũ chuyên gia hàng đầu.</p>
+                            <div class="mb-3">
+                                <h6>Đặc điểm nổi bật:</h6>
+                                <ul>
+                                    <li>Tăng cường sức đề kháng</li>
+                                    <li>Kích thích tăng trưởng</li>
+                                    <li>Cải thiện khả năng sinh sản</li>
+                                    <li>An toàn, không có tác dụng phụ</li>
+                                </ul>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Số lượng:</label>
+                                <div class="input-group" style="width: 150px;">
+                                    <button class="btn btn-outline-secondary">-</button>
+                                    <input type="number" class="form-control text-center" value="1" min="1">
+                                    <button class="btn btn-outline-secondary">+</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary">
+                                <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ hàng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Banner -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2>Vitamin ADE - Giải pháp toàn diện</h2>
+                    <p>Sản phẩm được nghiên cứu và phát triển bởi đội ngũ chuyên gia hàng đầu</p>
+                    <a href="#" class="btn btn-light">Xem sản phẩm</a>
+                </div>
+                <div class="col-md-6">
+                    <img src="{% static 'home/images/products/product1.jpg' %}" class="product-banner-img" alt="Product">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Cá nhân -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Đánh giá từ khách hàng cá nhân</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{% static 'home/images/avatars/avatar1.jpg' %}" class="rounded-circle me-3" alt="Avatar">
+                            <div>
+                                <h5 class="mb-0">Anh Nguyễn Văn A</h5>
+                                <small class="text-muted">Nông dân Hà Nội</small>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p>"Tôi đã sử dụng sản phẩm được 6 tháng, đàn bò của tôi khỏe mạnh hẳn, không còn bị bệnh như trước"</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{% static 'home/images/avatars/avatar2.jpg' %}" class="rounded-circle me-3" alt="Avatar">
+                            <div>
+                                <h5 class="mb-0">Chị Trần Thị B</h5>
+                                <small class="text-muted">Nông dân Bắc Ninh</small>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star-half-alt text-warning"></i>
+                        </div>
+                        <p>"Giá cả phải chăng mà hiệu quả rất tốt. Đàn lợn nhà tôi phát triển nhanh, ít bệnh tật"</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{% static 'home/images/avatars/avatar3.jpg' %}" class="rounded-circle me-3" alt="Avatar">
+                            <div>
+                                <h5 class="mb-0">Anh Lê Văn C</h5>
+                                <small class="text-muted">Nông dân Thái Bình</small>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p>"Dịch vụ tư vấn rất tận tình, sản phẩm chất lượng. Tôi sẽ tiếp tục ủng hộ"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Doanh nghiệp -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Đối tác doanh nghiệp tin dùng</h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{% static 'home/images/logos/company1.png' %}" class="company-logo me-3" alt="Company Logo">
+                            <div>
+                                <h5 class="mb-0">Công ty TNHH Chăn nuôi XYZ</h5>
+                                <small class="text-muted">Trang trại quy mô 1000 con</small>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p>"Là đối tác chiến lược trong 3 năm qua, chúng tôi hoàn toàn hài lòng với chất lượng sản phẩm và dịch vụ. Đội ngũ kỹ thuật hỗ trợ chuyên nghiệp, giúp trang trại của chúng tôi tối ưu hiệu quả chăn nuôi."</p>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-check-circle text-success me-2"></i>Đối tác tin cậy từ 2021
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{% static 'home/images/logos/company2.png' %}" class="company-logo me-3" alt="Company Logo">
+                            <div>
+                                <h5 class="mb-0">Tập đoàn Chăn nuôi ABC</h5>
+                                <small class="text-muted">Chuỗi trang trại toàn quốc</small>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p>"Sản phẩm đạt tiêu chuẩn quốc tế, giúp nâng cao hiệu quả chăn nuôi và giảm thiểu rủi ro dịch bệnh. Chúng tôi đánh giá cao sự hỗ trợ kịp thời và chuyên nghiệp từ đội ngũ kỹ thuật."</p>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-check-circle text-success me-2"></i>Khách hàng VIP từ 2020
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Tin tức mới nhất</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card news-card">
+                        <img src="{% static 'home/images/news/news1.jpg' %}" class="card-img-top" alt="News">
+                        <div class="card-body">
+                            <h5 class="card-title">Kỹ thuật chăn nuôi hiện đại</h5>
+                            <p class="card-text">Tìm hiểu về các phương pháp chăn nuôi tiên tiến...</p>
+                            <a href="#" class="btn btn-primary">Đọc thêm</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Thêm 2 news card tương tự -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Video hướng dẫn sử dụng</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="ratio ratio-16x9">
+                        <iframe src="https://www.youtube.com/embed/example" title="YouTube video" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Đăng nhập</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Vui lòng đăng nhập để thêm sản phẩm vào danh sách yêu thích.</p>
+                    <a href="{% url 'login' %}" class="btn btn-primary">Đăng nhập ngay</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Lấy CSRF token
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Xử lý nút wishlist
+    $('.wishlist-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const btn = $(this);
+        const productId = btn.data('product-id');
+        
+        // Kiểm tra đăng nhập
+        if (!btn.data('bs-toggle')) {
+            $.ajax({
+                url: `/wishlist/toggle/${productId}/`,
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Cập nhật icon
+                        const icon = btn.find('i');
+                        if (response.action === 'added') {
+                            icon.removeClass('far').addClass('fas');
+                            btn.attr('data-in-wishlist', 'true');
+                        } else {
+                            icon.removeClass('fas').addClass('far');
+                            btn.removeAttr('data-in-wishlist');
+                        }
+                        
+                        // Hiển thị thông báo
+                        toastr.success(response.message);
+                    } else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function() {
+                    toastr.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+                }
+            });
+        }
+    });
+
+    // Xử lý nút thêm vào giỏ hàng
+    $('.add-to-cart').click(function(e) {
+        e.preventDefault();
+        
+        const btn = $(this);
+        const productId = btn.data('product-id');
+        const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+        
+        console.log('Auth status:', isAuthenticated);
+        
+        // Kiểm tra đăng nhập
+        if (!isAuthenticated) {
+            toastr.warning('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
+            {% comment %} $('#loginModal').modal('show'); {% endcomment %}
+            return;
+        }
+        
+        // Vô hiệu hóa nút trong khi xử lý
+        btn.prop('disabled', true);
+        
+        $.ajax({
+            url: `/cart/add/${productId}/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            data: {
+                'quantity': 1
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Cập nhật số lượng trong giỏ hàng
+                    if (response.cart_count !== undefined) {
+                        $('.cart-badge').text(response.cart_count);
+                    }
+                    
+                    // Hiển thị thông báo thành công
+                    toastr.success('Đã thêm sản phẩm vào giỏ hàng');
+                    
+                    // Hiệu ứng animation cho icon giỏ hàng
+                    $('.cart-btn i').addClass('animate__animated animate__bounce');
+                    setTimeout(function() {
+                        $('.cart-btn i').removeClass('animate__animated animate__bounce');
+                    }, 1000);
+                } else {
+                    toastr.error(response.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    toastr.warning('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng');
+                    $('#loginModal').modal('show');
+                } else {
+                    toastr.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+                }
+            },
+            complete: function() {
+                // Kích hoạt lại nút sau khi xử lý xong
+                btn.prop('disabled', false);
+            }
+        });
+    });
+
+    // Xử lý nút wishlist
+    $('.add-to-wishlist').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if ($(this).data('bs-toggle')) return; // Skip if login modal trigger
+        
+        const btn = $(this);
+        const productId = btn.data('id');
+        const icon = btn.find('i');
+        
+        btn.prop('disabled', true);
+        icon.attr('class', 'fas fa-spinner fa-spin');
+        
+        $.ajax({
+            url: `/wishlist/toggle/${productId}/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function(response) {
+                if (response.success) {
+                    if (response.action === 'added') {
+                        btn.addClass('active');
+                        icon.attr('class', 'fas fa-heart');
+                        btn.attr('title', 'Xóa khỏi yêu thích');
+                    } else {
+                        btn.removeClass('active');
+                        icon.attr('class', 'far fa-heart');
+                        btn.attr('title', 'Thêm vào yêu thích');
+                    }
+                    toastr.success(response.message);
+                } else {
+                    toastr.error(response.message || 'Có lỗi xảy ra');
+                    icon.attr('class', btn.hasClass('active') ? 'fas fa-heart' : 'far fa-heart');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                icon.attr('class', btn.hasClass('active') ? 'fas fa-heart' : 'far fa-heart');
+                toastr.error('Có lỗi xảy ra khi thêm vào yêu thích');
+            },
+            complete: function() {
+                btn.prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

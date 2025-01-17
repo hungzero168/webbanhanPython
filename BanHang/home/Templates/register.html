@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Đăng ký - Thuốc Thú Y{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        border-radius: 20px;
+        background: white;
+    }
+    .logo-container {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .logo-container img {
+        height: 80px;
+        width: auto;
+        transition: transform 0.3s;
+    }
+    .logo-container img:hover {
+        transform: scale(1.1);
+    }
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+    .form-floating > .form-control {
+        padding: 1rem 0.75rem;
+    }
+    .form-floating > label {
+        padding: 1rem 0.75rem;
+    }
+    .btn-register {
+        padding: 12px 0;
+        font-size: 1.1rem;
+        font-weight: 500;
+        border-radius: 10px;
+    }
+    .terms-check {
+        margin: 1.5rem 0;
+    }
+    .divider {
+        position: relative;
+        text-align: center;
+        margin: 2rem 0;
+    }
+    .divider::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 45%;
+        height: 1px;
+        background: #dee2e6;
+    }
+    .divider::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        width: 45%;
+        height: 1px;
+        background: #dee2e6;
+    }
+    .divider span {
+        background: white;
+        padding: 0 1rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .invalid-feedback {
+        font-size: 0.85rem;
+    }
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="register-container">
+        <div class="logo-container">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'home/images/logo.jpeg' %}" alt="Logo" class="mb-4">
+            </a>
+            <h2 class="mb-2">Đăng ký tài khoản</h2>
+            <p class="text-muted">Tham gia cùng chúng tôi để có trải nghiệm mua sắm tốt nhất</p>
+        </div>
+
+        <form method="POST" class="needs-validation" novalidate>
+            {% csrf_token %}
+            {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="first_name" name="first_name" 
+                               placeholder="Họ" required pattern="[A-Za-zÀ-ỹ\s]+" minlength="2">
+                        <label for="first_name">Họ <span class="text-danger">*</span></label>
+                        <div class="invalid-feedback">
+                            Vui lòng nhập họ (ít nhất 2 ký tự, chỉ chứa chữ cái)
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="last_name" name="last_name" 
+                               placeholder="Tên" required pattern="[A-Za-zÀ-ỹ\s]+" minlength="2">
+                        <label for="last_name">Tên <span class="text-danger">*</span></label>
+                        <div class="invalid-feedback">
+                            Vui lòng nhập tên (ít nhất 2 ký tự, chỉ chứa chữ cái)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-floating">
+                <input type="text" class="form-control" id="username" name="username" 
+                       placeholder="Tên đăng nhập" required minlength="4">
+                <label for="username">Tên đăng nhập <span class="text-danger">*</span></label>
+                <div class="invalid-feedback">
+                    Tên đăng nhập phải có ít nhất 4 ký tự
+                </div>
+            </div>
+
+            <div class="form-floating">
+                <input type="email" class="form-control" id="email" name="email" 
+                       placeholder="Email" required>
+                <label for="email">Email <span class="text-danger">*</span></label>
+                <div class="invalid-feedback">
+                    Vui lòng nhập email hợp lệ
+                </div>
+            </div>
+
+            <div class="form-floating">
+                <input type="tel" class="form-control" id="phone" name="phone" 
+                       placeholder="Số điện thoại" required pattern="[0-9]{10}">
+                <label for="phone">Số điện thoại <span class="text-danger">*</span></label>
+                <div class="invalid-feedback">
+                    Vui lòng nhập số điện thoại hợp lệ (10 chữ số)
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="password1" name="password1" 
+                               placeholder="Mật khẩu" required minlength="8">
+                        <label for="password1">Mật khẩu <span class="text-danger">*</span></label>
+                        <div class="invalid-feedback">
+                            Mật khẩu phải có ít nhất 8 ký tự
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="password2" name="password2" 
+                               placeholder="Xác nhận mật khẩu" required>
+                        <label for="password2">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                        <div class="invalid-feedback">
+                            Vui lòng xác nhận lại mật khẩu
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="terms-check">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="agree" name="agree" required>
+                    <label class="form-check-label" for="agree">
+                        Tôi đồng ý với <a href="#" class="text-decoration-none">điều khoản</a> và 
+                        <a href="#" class="text-decoration-none">chính sách bảo mật</a>
+                    </label>
+                    <div class="invalid-feedback">
+                        Bạn phải đồng ý với điều khoản để tiếp tục
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-register">
+                    <i class="fas fa-user-plus me-2"></i>Đăng ký
+                </button>
+            </div>
+
+            <div class="divider">
+                <span>hoặc</span>
+            </div>
+
+            <div class="text-center">
+                <p class="mb-0">Đã có tài khoản? 
+                    <a href="{% url 'login' %}" class="text-decoration-none fw-bold">Đăng nhập ngay</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Form validation
+    (function () {
+        'use strict'
+        
+        var forms = document.querySelectorAll('.needs-validation')
+        
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+{% endblock %}
+{% endblock %} 

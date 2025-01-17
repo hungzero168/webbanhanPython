@@ -1,0 +1,481 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load custom_filters %}
+
+{% block title %}
+{% if query %}
+Tìm kiếm - {{ query }}
+{% else %}
+Sản phẩm
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+
+<div class="container py-5">
+
+
+    <div class="row">
+        <!-- Sidebar filters -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Bộ lọc</h5>
+                    
+                    <!-- Category filter -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Danh mục</h6>
+                        <div class="list-group">
+                            <a href="?{% if query %}q={{ query }}&{% endif %}sort={{ sort }}" 
+                               class="list-group-item list-group-item-action {% if not selected_category %}active{% endif %}">
+                                Tất cả
+                            </a>
+                            {% for category in categories %}
+                            <a href="?{% if query %}q={{ query }}&{% endif %}category={{ category.id }}&sort={{ sort }}" 
+                               class="list-group-item list-group-item-action {% if selected_category == category.id|stringformat:'s' %}active{% endif %}">
+                                {{ category.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Sort options -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Sắp xếp</h6>
+                        <div class="list-group">
+                            <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}sort=newest" 
+                               class="list-group-item list-group-item-action {% if sort == 'newest' %}active{% endif %}">
+                                Mới nhất
+                            </a>
+                            <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}sort=price_asc" 
+                               class="list-group-item list-group-item-action {% if sort == 'price_asc' %}active{% endif %}">
+                                Giá tăng dần
+                            </a>
+                            <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}sort=price_desc" 
+                               class="list-group-item list-group-item-action {% if sort == 'price_desc' %}active{% endif %}">
+                                Giá giảm dần
+                            </a>
+                            <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}sort=name_asc" 
+                               class="list-group-item list-group-item-action {% if sort == 'name_asc' %}active{% endif %}">
+                                Tên A-Z
+                            </a>
+                            <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}sort=name_desc" 
+                               class="list-group-item list-group-item-action {% if sort == 'name_desc' %}active{% endif %}">
+                                Tên Z-A
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products grid -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                {% if query %}
+                <h4>Kết quả tìm kiếm cho "{{ query }}"</h4>
+                <span class="text-muted">Tìm thấy {{ products.paginator.count }} sản phẩm</span>
+                {% else %}
+                <h4>Tất cả sản phẩm</h4>
+                <span class="text-muted">{{ products.paginator.count }} sản phẩm</span>
+                {% endif %}
+            </div>
+
+            {% if products %}
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-md-4">
+                    <div class="card product-card h-100">
+                        <!-- Discount badge -->
+                        {% if product.old_price %}
+                        <div class="badge bg-danger position-absolute top-0 end-0 m-2">
+                            -{{ product.old_price|discount_percent:product.price }}%
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Wishlist button -->
+                        {% if user.is_authenticated %}
+                        <button class="add-to-wishlist {% if product in wishlist_products %}active{% endif %}" 
+                                data-id="{{ product.id }}" 
+                                title="{% if product in wishlist_products %}Xóa khỏi yêu thích{% else %}Thêm vào yêu thích{% endif %}">
+                            <i class="{% if product in wishlist_products %}fas{% else %}far{% endif %} fa-heart"></i>
+                        </button>
+                        {% else %}
+                        <button class="add-to-wishlist" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        {% endif %}
+
+                        <!-- Product image and details -->
+                        <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
+                            {% if product.image %}
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                            {% else %}
+                            <img src="{% static 'home/images/no-image.png' %}" class="card-img-top" alt="No image">
+                            {% endif %}
+                            
+                            <div class="card-body">
+                                <h5 class="card-title text-dark">{{ product.name }}</h5>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-tag me-1"></i>{{ product.category.name }}
+                                </p>
+                                
+                                <!-- Rating -->
+                                <div class="rating">
+                                    {% for i in "12345"|make_list %}
+                                    <i class="{% if forloop.counter <= product.average_rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                    {% endfor %}
+                                    <span class="count">({{ product.review_count }})</span>
+                                </div>
+
+                                <!-- Price -->
+                                <div class="price-section">
+                                    {% if product.old_price %}
+                                    <span class="old-price">{{ product.old_price|floatformat:0|intcomma }}đ</span>
+                                    {% endif %}
+                                    <span class="current-price">{{ product.price|floatformat:0|intcomma }}đ</span>
+                                </div>
+
+                                <!-- Stock status -->
+                                <p class="stock-status">
+                                    {% if product.stock > 0 %}
+                                    <i class="fas fa-check-circle me-1 in-stock"></i>
+                                    <span class="in-stock">Còn hàng</span>
+                                    {% else %}
+                                    <i class="fas fa-times-circle me-1 out-of-stock"></i>
+                                    <span class="out-of-stock">Hết hàng</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </a>
+
+                        <!-- Add to cart button -->
+                        <div class="card-footer bg-transparent border-0">
+                            <button class="btn add-to-cart" 
+                                    data-product-id="{{ product.id }}"
+                                    data-logged-in="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+                                <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if products.has_other_pages %}
+            <div class="d-flex justify-content-center mt-5">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}sort={{ sort }}&page={{ products.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i> Trước
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-chevron-left"></i> Trước</span>
+                        </li>
+                        {% endif %}
+
+                        {% for i in products.paginator.page_range %}
+                            {% if products.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}sort={{ sort }}&page={{ i }}">{{ i }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}sort={{ sort }}&page={{ products.next_page_number }}">
+                                Sau <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Sau <i class="fas fa-chevron-right"></i></span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <img src="{% static 'home/images/no-results.png' %}" alt="No results" class="mb-4" style="max-width: 200px;">
+                <h5>Không tìm thấy sản phẩm nào</h5>
+                <p class="text-muted">Vui lòng thử lại với từ khóa khác</p>
+                <a href="{% url 'home' %}" class="btn btn-primary">Quay về trang chủ</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Đăng nhập</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Vui lòng đăng nhập để thêm sản phẩm vào danh sách yêu thích.</p>
+                <a href="{% url 'login' %}" class="btn btn-primary">Đăng nhập ngay</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Product card styles */
+.product-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.product-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.product-card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+.add-to-wishlist {
+    transition: all 0.3s;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    opacity: 0;
+    transform: translateY(-10px);
+    z-index: 3;
+}
+
+.product-card:hover .add-to-wishlist {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.add-to-wishlist.active {
+    background-color: #dc3545;
+    color: white;
+}
+
+.add-to-wishlist.active i {
+    font-weight: 900;
+}
+
+.rating {
+    color: #ffc107;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.rating .count {
+    color: #6c757d;
+    margin-left: 5px;
+}
+
+.price-section {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.current-price {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.stock-status {
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.in-stock {
+    color: #28a745;
+}
+
+.out-of-stock {
+    color: #dc3545;
+}
+
+.add-to-cart {
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.add-to-cart:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-2px);
+}
+
+.add-to-cart:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Filter styles */
+.list-group-item.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.list-group-item:hover:not(.active) {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Lấy CSRF token
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Xử lý nút wishlist
+$('.add-to-wishlist').click(function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if ($(this).data('bs-toggle')) return; // Skip if login modal trigger
+    
+    const btn = $(this);
+    const productId = btn.data('id');
+    const icon = btn.find('i');
+    
+    btn.prop('disabled', true);
+    icon.attr('class', 'fas fa-spinner fa-spin');
+    
+    $.ajax({
+        url: `/wishlist/toggle/${productId}/`,
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        success: function(response) {
+            if (response.success) {
+                if (response.action === 'added') {
+                    btn.addClass('active');
+                    icon.attr('class', 'fas fa-heart');
+                    btn.attr('title', 'Xóa khỏi yêu thích');
+                } else {
+                    btn.removeClass('active');
+                    icon.attr('class', 'far fa-heart');
+                    btn.attr('title', 'Thêm vào yêu thích');
+                }
+                toastr.success(response.message);
+        } else {
+                toastr.error(response.message || 'Có lỗi xảy ra');
+                icon.attr('class', btn.hasClass('active') ? 'fas fa-heart' : 'far fa-heart');
+            }
+        },
+            error: function() {
+                toastr.error('Có lỗi xảy ra khi thêm vào yêu thích');
+            icon.attr('class', btn.hasClass('active') ? 'fas fa-heart' : 'far fa-heart');
+        },
+        complete: function() {
+            btn.prop('disabled', false);
+        }
+    });
+});
+
+    // Xử lý nút thêm vào giỏ hàng
+    $('.add-to-cart').click(function(e) {
+        e.preventDefault();
+        
+        const btn = $(this);
+        const productId = btn.data('product-id');
+        
+        // Kiểm tra đăng nhập
+        if (!btn.data('logged-in')) {
+            toastr.warning('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
+            {% comment %} $('#loginModal').modal('show'); {% endcomment %}
+            return;
+        }
+        
+        btn.prop('disabled', true);
+        
+        $.ajax({
+            url: `/cart/add/${productId}/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            data: {
+                'quantity': 1
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#cart-count').text(response.cart_count);
+                    toastr.success('Đã thêm sản phẩm vào giỏ hàng');
+                    
+                    $('#cart-icon').addClass('animate__animated animate__bounce');
+                    setTimeout(function() {
+                        $('#cart-icon').removeClass('animate__animated animate__bounce');
+                    }, 1000);
+                } else {
+                    toastr.error(response.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    toastr.warning('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng');
+                    $('#loginModal').modal('show');
+                } else {
+                    toastr.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+                }
+            },
+            complete: function() {
+                btn.prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

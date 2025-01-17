@@ -1,0 +1,541 @@
+{% load static %}
+<header>
+    <!-- Top Bar -->
+    <div class="top-bar bg-primary text-white py-2">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-phone-alt me-2"></i>
+                        <span class="me-4">0123.456.789</span>
+                        <i class="fas fa-envelope me-2"></i>
+                        <span>info@thuocthuy.com</span>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="social-links">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="{% static 'home/images/logo.png' %}" alt="Logo" height="50">
+            </a>
+
+            <!-- Toggle Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Menu Items -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">
+                            <i class="fas fa-home me-1"></i>Trang chủ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/products/' %}active{% endif %}" href="{% url 'products' %}">
+                            <i class="fas fa-box me-1"></i>Sản phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/news/' %}active{% endif %}" href="{% url 'news' %}">
+                            <i class="fas fa-newspaper me-1"></i>Tin tức
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/about/' %}active{% endif %}" href="{% url 'about' %}">
+                            <i class="fas fa-info-circle me-1"></i>Giới thiệu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/contact/' %}active{% endif %}" href="{% url 'contact' %}">
+                            <i class="fas fa-phone me-1"></i>Liên hệ
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Search form -->
+                <form action="{% url 'products' %}" method="GET" class="d-flex mx-auto" style="max-width: 500px;">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control search-input" placeholder="Tìm kiếm sản phẩm..." 
+                            value="{{ request.GET.q }}">
+                        <button class="btn btn-primary search-btn" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- User Menu -->
+                <div class="d-flex align-items-center">
+                    {% if user.is_authenticated %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle user-menu d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                {% if user.userprofile.avatar %}
+                                    <img src="{{ user.userprofile.avatar.url }}" alt="Avatar" class="header-avatar">
+                                {% else %}
+                                    <img src="{% static 'home/images/avatar-default.png' %}" alt="Avatar" class="header-avatar">
+                                {% endif %}
+                                <span class="ms-2">{{ user.get_full_name|default:user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end animate slideIn" aria-labelledby="navbarDropdown">
+                                {% if user.is_staff %}
+                                    <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fas fa-tools me-2"></i>Quản trị</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i>Tài khoản của tôi</a></li>
+                                <li><a class="dropdown-item" href="{% url 'profile' %}#orders" onclick="showOrdersTab()"><i class="fas fa-box me-2"></i>Đơn hàng</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm me-2">
+                            <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-user-plus me-1"></i>Đăng ký
+                        </a>
+                    {% endif %}
+
+                    <!-- Cart Button -->
+                    <a href="{% url 'cart' %}" class="btn btn-outline-primary btn-sm ms-2 position-relative cart-btn">
+                        <i class="fas fa-shopping-cart"></i>
+                        {% if cart_count %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">
+                                {{ cart_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- Floating Contact Buttons -->
+<div class="floating-contact">
+    <a href="tel:0123456789" class="floating-btn phone-btn" title="Gọi ngay">
+        <i class="fas fa-phone-alt"></i>
+    </a>
+    <a href="mailto:info@thuocthuy.com" class="floating-btn email-btn" title="Gửi email">
+        <i class="fas fa-envelope"></i>
+    </a>
+    <a href="https://zalo.me/0123456789" class="floating-btn zalo-btn" title="Chat Zalo">
+        <i class="fas fa-comments"></i>
+    </a>
+    <a href="https://m.me/thuocthuy" class="floating-btn messenger-btn" title="Chat Messenger">
+        <i class="fab fa-facebook-messenger"></i>
+    </a>
+</div>
+
+<style>
+    /* Top Bar Styles */
+    .top-bar {
+        font-size: 0.9rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .social-links a {
+        transition: all 0.3s ease;
+        opacity: 0.8;
+    }
+
+    .social-links a:hover {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+
+    /* Navbar Styles */
+    .navbar {
+        padding: 1rem 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        transition: all 0.3s ease;
+    }
+
+    .navbar.scrolled {
+        padding: 0.5rem 0;
+    }
+
+    /* Navigation Links */
+    .navbar-nav .nav-link {
+        padding: 0.8rem 1.2rem;
+        font-weight: 500;
+        color: #2c3e50;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-nav .nav-link:hover {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.05);
+        transform: translateY(-1px);
+    }
+
+    .navbar-nav .nav-link.active {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+
+    /* Search Form */
+    .search-input {
+        border-radius: 20px 0 0 20px;
+        border: 2px solid #e9ecef;
+        border-right: none;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: #0d6efd;
+        box-shadow: none;
+    }
+
+    .search-btn {
+        border-radius: 0 20px 20px 0;
+        padding: 0.6rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-btn:hover {
+        transform: translateX(2px);
+    }
+
+    /* User Menu */
+    .header-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .user-menu {
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+
+    .user-menu:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .user-menu:hover .header-avatar {
+        transform: scale(1.1);
+    }
+
+    /* Dropdown Menu */
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        padding: 0.8rem 0;
+        margin-top: 10px;
+    }
+
+    .dropdown-item {
+        padding: 0.8rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+        padding-left: 2rem;
+    }
+
+    .dropdown-item.text-danger:hover {
+        background-color: rgba(220, 53, 69, 0.05);
+    }
+
+    /* Cart Button */
+    .cart-btn {
+        padding: 0.6rem 1rem;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .cart-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .cart-badge {
+        transform: translate(30%, -30%) !important;
+        font-size: 0.7rem;
+        padding: 0.35em 0.55em;
+    }
+
+    /* Animation for Dropdown */
+    @keyframes slideIn {
+        0% {
+            transform: translateY(1rem);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0rem);
+            opacity: 1;
+        }
+    }
+
+    .animate.slideIn {
+        animation: slideIn 0.3s ease-in-out;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 992px) {
+        .navbar-nav {
+            padding: 1rem 0;
+        }
+        
+        .navbar-nav .nav-link {
+            padding: 0.8rem 1rem;
+        }
+
+        .search-input {
+            margin-bottom: 1rem;
+        }
+
+        .user-menu {
+            padding: 0.5rem;
+            margin: 1rem 0;
+        }
+    }
+
+    /* Floating Contact Buttons */
+    .floating-contact {
+        position: fixed;
+        right: 30px;
+        bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        z-index: 9999;
+    }
+
+    .floating-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        font-size: 24px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .floating-btn::before {
+        content: '';
+        position: absolute;
+        width: 150%;
+        height: 150%;
+        background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+        top: -25%;
+        left: -25%;
+        transition: all 0.5s ease;
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    .floating-btn:hover::before {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    .floating-btn i {
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+
+    .floating-btn:hover i {
+        transform: scale(1.2) rotate(10deg);
+    }
+
+    .floating-btn:hover {
+        transform: translateY(-10px) scale(1.15);
+        color: white;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        border-color: rgba(255,255,255,0.6);
+    }
+
+    .floating-btn::after {
+        content: attr(title);
+        position: absolute;
+        right: 120%;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0,0,0,0.85);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .floating-btn:hover::after {
+        opacity: 1;
+        right: 110%;
+    }
+
+    .phone-btn {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        animation: pulse-green 2s infinite, shake 3s infinite;
+    }
+
+    .email-btn {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        animation: pulse-red 2s infinite;
+    }
+
+    .zalo-btn {
+        background: linear-gradient(135deg, #0068ff 0%, #0055cc 100%);
+        animation: pulse-blue 2s infinite;
+    }
+
+    .messenger-btn {
+        background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+        animation: pulse-messenger 2s infinite;
+    }
+
+    @keyframes pulse-green {
+        0% {
+            box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.6);
+        }
+        70% {
+            box-shadow: 0 0 0 20px rgba(46, 204, 113, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+        }
+    }
+
+    @keyframes pulse-red {
+        0% {
+            box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.6);
+        }
+        70% {
+            box-shadow: 0 0 0 20px rgba(231, 76, 60, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+        }
+    }
+
+    @keyframes pulse-blue {
+        0% {
+            box-shadow: 0 0 0 0 rgba(0, 104, 255, 0.6);
+        }
+        70% {
+            box-shadow: 0 0 0 20px rgba(0, 104, 255, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(0, 104, 255, 0);
+        }
+    }
+
+    @keyframes pulse-messenger {
+        0% {
+            box-shadow: 0 0 0 0 rgba(0, 198, 255, 0.6);
+        }
+        70% {
+            box-shadow: 0 0 0 20px rgba(0, 198, 255, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(0, 198, 255, 0);
+        }
+    }
+
+    @keyframes shake {
+        0%, 100% {
+            transform: rotate(0);
+        }
+        20%, 60% {
+            transform: rotate(-10deg);
+        }
+        40%, 80% {
+            transform: rotate(10deg);
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .floating-contact {
+            right: 20px;
+            bottom: 20px;
+            gap: 15px;
+        }
+        
+        .floating-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
+
+        .floating-btn::after {
+            display: none;
+        }
+    }
+</style>
+
+<script>
+    // Thêm hiệu ứng scroll cho navbar
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    function showOrdersTab() {
+        document.addEventListener('DOMContentLoaded', function() {
+            var ordersTab = document.querySelector('#orders-tab');
+            if (ordersTab) {
+                var tab = new bootstrap.Tab(ordersTab);
+                tab.show();
+            }
+        });
+
+        var ordersTab = document.querySelector('#orders-tab');
+        if (ordersTab) {
+            var tab = new bootstrap.Tab(ordersTab);
+            tab.show();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.location.hash === '#orders') {
+            showOrdersTab();
+        }
+    });
+</script> 
